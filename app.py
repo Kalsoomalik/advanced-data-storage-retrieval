@@ -51,13 +51,15 @@ def welcome():
     )
 
 
+# `/api/v1.0/precipitation`
+#  Query for the dates and temperature observations from the last year.
+#  Convert the query results to a Dictionary using `date` as the key and `tobs` as the value.
+#  Return the JSON representation of your dictionary.
 @app.route("/api/v1.0/precipitation")
 def names():
 
-    # Query termperature observations from last year
     results = session.query(Measurement.date, Measurement.tobs).all()
-
-    # Create a dictionary from the row data
+  
     all_observations = []
     for observation in results:
         observation_dict = {}
@@ -66,15 +68,23 @@ def names():
 
     return jsonify(all_observations)
 
+
+
+# `/api/v1.0/stations`
+# Return a JSON list of stations from the dataset.
+
 @app.route("/api/v1.0/stations")
 def stations():
     
-    #Query list of stations from data
     results = session.query(Measurement.station).all()
     
-    # Create a dictionary in JSON
     station_names = list(np.ravel(results))
     return jsonify(station_names)
+
+
+
+# `/api/v1.0/tobs`
+# Return a JSON list of Temperature Observations (tobs) for the previous year
 
 @app.route("/api/v1.0/tobs/")
 def tobs():
@@ -88,6 +98,10 @@ def tobs():
     return jsonify(temp_obs)
 
 
+# `/api/v1.0/<start>`
+# Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
+# When given the start only, calculate `TMIN`, `TAVG`, and `TMAX` for all dates greater than and equal to the start date.
+
 @app.route("/api/v1.0/<start>")
 def tobs_start(start):
     start_date = "'" + start + "'"
@@ -96,6 +110,10 @@ def tobs_start(start):
                             func.max(Measurement.tobs)).filter(Measurement.date >= start_date).all()
     temp_start = list(np.ravel(results))
     return jsonify(temp_start)
+
+
+# `/api/v1.0/<start>/<end>`
+# When given the start and the end date, calculate the `TMIN`, `TAVG`, and `TMAX` for dates between the start and end date inclusive.
 
 @app.route("/api/v1.0/<start>/<end>")
 def tobs_start_end(start, end):
